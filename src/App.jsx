@@ -1,35 +1,19 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "./firebaseConfig";
+import SignInButton from "./components/SignInButton";
+import ChatRoom from "./components/ChatRoom";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [user] = useAuthState(auth);
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center">
+      <h1 className="text-4xl font-bold mb-8">Welcome to the Chat App</h1>
+      <div className="bg-white shadow-md rounded-lg p-8">
+        {user ? <ChatRoom /> : <SignInButton />}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;
