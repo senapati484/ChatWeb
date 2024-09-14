@@ -23,26 +23,30 @@ const ChatRoom = () => {
   };
 
   return (
-    <div className="w-full max-w-lg">
-      <div className="h-64 bg-gray-100 p-4 overflow-y-auto rounded-lg shadow-inner mb-4">
-        {messages.map((msg, idx) => (
-          <p key={idx} className="mb-2">
-            <strong className="text-blue-500">{msg.displayName}</strong>:{" "}
-            {msg.text}
-          </p>
-        ))}
+    <div className="bg-gray-100 p-6 rounded-lg shadow-lg">
+      <div className="h-64 overflow-y-auto bg-white p-4 rounded-lg shadow-inner mb-4">
+        {messages.length > 0 ? (
+          messages.map((msg, idx) => (
+            <div key={idx} className="mb-3">
+              <p className="text-blue-500 font-semibold">{msg.displayName}</p>
+              <p className="text-gray-800">{msg.text}</p>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-400 text-center">No messages yet.</p>
+        )}
       </div>
 
-      <div className="flex space-x-2">
+      <div className="flex items-center space-x-4">
         <input
-          className="flex-1 px-4 py-2 border rounded-lg focus:outline-none"
+          className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Type a message..."
+          placeholder="Type your message..."
         />
         <button
           onClick={handleSend}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all"
+          className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 transform hover:scale-105"
         >
           Send
         </button>
