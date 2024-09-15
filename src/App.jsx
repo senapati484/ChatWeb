@@ -17,7 +17,7 @@ function App() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600">
-      <div className="bg-white shadow-lg lg:rounded-xl md:rounded-lg p-5 md:p-8 max-w-4xl w-full h-[90vh] lg:h-[80vh] flex flex-col">
+      <div className="bg-white shadow-lg lg:rounded-xl md:rounded-lg p-5 md:p-8 max-w-4xl w-full h-full lg:h-[80vh] flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold text-gray-800 text-center">
             Welcome to ChatWeb
