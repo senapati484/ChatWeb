@@ -1,78 +1,92 @@
 import { useState, useEffect } from "react";
-import { getMessages, sendMessage } from "../Firestore";
+import { listenForMessages, sendMessage } from "../Firestore";
 import { auth } from "../firebaseConfig";
 
 const ChatRoom = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const currentUser = auth.currentUser; // Get the current user
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchMessages = async () => {
-      const msgs = await getMessages();
-      setMessages(msgs);
-    };
-    fetchMessages();
+    const unsubscribe = listenForMessages(
+      (newMessages) => {
+        setMessages(newMessages);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error fetching messages:", error);
+        setError("Failed to load messages.");
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
   }, []);
 
   const handleSend = async () => {
+    const user = auth.currentUser;
     if (newMessage.trim()) {
-      await sendMessage(newMessage, currentUser);
-      setNewMessage("");
+      try {
+        await sendMessage(newMessage, user);
+        setNewMessage("");
+      } catch (error) {
+        console.error("Error sending message:", error);
+        setError("Failed to send message.");
+      }
     }
   };
 
+  const user = auth.currentUser;
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
+
   return (
-    <div className="flex flex-col h-full">
-      {/* Chat Messages Container */}
-      <div className="flex-grow overflow-y-auto bg-gray-100 p-4 rounded-lg shadow-inner mb-4">
+    <div className="bg-gray-100 p-6 rounded-lg shadow-lg flex flex-col h-full">
+      <div className="flex-grow h-64 overflow-y-auto bg-white p-4 rounded-lg shadow-inner mb-4">
         {messages.length > 0 ? (
-          messages.map((msg, idx) => {
-            const isCurrentUser = msg.uid === currentUser?.uid;
-            return (
+          messages.map((msg, idx) => (
+            <div
+              key={idx}
+              className={`flex mb-3 ${
+                msg.uid === user.uid ? "justify-end" : "justify-start"
+              }`}
+            >
+              {msg.uid !== user.uid && (
+                <img
+                  src={msg.photoURL || "https://via.placeholder.com/150"}
+                  alt={msg.displayName}
+                  className="w-10 h-10 rounded-full mr-3"
+                />
+              )}
+
               <div
-                key={idx}
-                className={`flex mb-4 ${
-                  isCurrentUser ? "justify-end" : "justify-start"
+                className={`max-w-xs rounded-lg p-3 ${
+                  msg.uid === user.uid
+                    ? "bg-blue-500 text-white text-right"
+                    : "bg-gray-200 text-gray-800"
                 }`}
               >
-                <div
-                  className={`max-w-xs p-3 rounded-lg shadow-md ${
-                    isCurrentUser
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-800"
-                  }`}
-                >
-                  {/* Display Name */}
-                  <p
-                    className={`text-sm font-semibold ${
-                      isCurrentUser ? "text-right" : "text-left"
-                    }`}
-                  >
-                    {msg.displayName}
-                  </p>
-                  {/* Message Text */}
-                  <p>{msg.text}</p>
-                </div>
+                <p>{msg.text}</p>
               </div>
-            );
-          })
+            </div>
+          ))
         ) : (
           <p className="text-gray-400 text-center">No messages yet.</p>
         )}
       </div>
 
-      {/* Input Box and Send Button */}
       <div className="flex items-center space-x-4">
         <input
-          className="flex-1 px-4 py-2 m-1 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type your message..."
         />
         <button
           onClick={handleSend}
-          className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 transform"
+          className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 transform hover:scale-105"
         >
           Send
         </button>
